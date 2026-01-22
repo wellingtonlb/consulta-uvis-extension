@@ -14,11 +14,9 @@ A maneira mais segura e fácil é instalar através da loja oficial:
 2. Clique em **"Usar no Chrome"**.
 3. O ícone aparecerá na sua barra de tarefas.
 
-## Preview
+## Sobre
 
-![Preview da Extensão](./screenshots/imagem1.png)
-
-Este projeto é **Open Source**. Priorizamos a privacidade e a transparência.
+Este projeto é **Open Source**. Foi priorizada a privacidade e a transparência.
 
 * **Manifest V3:** Segue os padrões mais recentes de segurança do Google.
 * **Sem Rastreamento:** Nenhuma informação pessoal ou de navegação é coletada.
@@ -26,7 +24,7 @@ Este projeto é **Open Source**. Priorizamos a privacidade e a transparência.
 * **Turf.js:** Processamento matemático dos polígonos feito localmente no seu navegador.
 
 ---
-## 📸 Como funciona
+## Como funciona
 
 A extensão é simples e direta. Veja o fluxo de uso:
 
