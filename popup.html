@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <style>
+        /* Estilos Gerais */
+        body { 
+            width: 380px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f6f9; 
+            margin: 0; 
+            padding: 15px; 
+        }
+
+        h3 { 
+            color: #0d6efd; 
+            text-align: center; 
+            margin: 0 0 15px 0; 
+            font-size: 18px; 
+        }
+
+        /* Inputs */
+        .input-group { margin-bottom: 10px; }
+        label { font-size: 11px; font-weight: bold; color: #6c757d; display: block; margin-bottom: 2px; }
+        input { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ced4da; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+        }
+        .row { display: flex; gap: 10px; }
+        .col-8 { flex: 2; }
+        .col-4 { flex: 1; }
+
+        /* Botão Consultar */
+        .btn-main { 
+            width: 100%; 
+            padding: 10px; 
+            background: #0d6efd; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            font-size: 14px;
+            transition: 0.2s; 
+        }
+        .btn-main:hover { background: #0b5ed7; }
+
+        /* Loading */
+        #loading { display: none; text-align: center; padding: 15px; color: #6c757d; font-size: 12px; }
+        .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(0,0,0,0.1); border-left-color: #0d6efd; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Resultados */
+        #results-area { display: none; margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 10px; }
+        
+        .result-row { 
+            display: flex; 
+            align-items: center; 
+            background: white; 
+            border: 1px solid #dee2e6; 
+            padding: 8px 10px; 
+            border-radius: 6px; 
+            margin-bottom: 8px; 
+        }
+        
+        .res-content { flex: 1; overflow: hidden; }
+        .res-label { font-size: 10px; color: #6c757d; text-transform: uppercase; font-weight: 700; display: block; }
+        .res-value { font-size: 13px; color: #212529; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Cores das bordas */
+        .border-uvis { border-left: 4px solid #0d6efd; }
+        .border-da { border-left: 4px solid #198754; }
+        .border-std { border-left: 4px solid #adb5bd; }
+
+        /* Botão Copiar Pequeno */
+        .btn-copy { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            color: #495057; 
+            width: 32px; height: 32px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 8px;
+            transition: 0.2s;
+        }
+        .btn-copy:hover { background: #e9ecef; color: #0d6efd; }
+        .btn-copy.copied { background: #198754; color: white; border-color: #198754; }
+    </style>
+</head>
+<body>
+    <h3>📍 Consulta UVIS</h3>
+
+    <div class="input-group">
+        <label>CEP (Busca Automática)</label>
+        <input type="text" id="cep" placeholder="00000-000" maxlength="9">
+    </div>
+
+    <div class="input-group row">
+        <div class="col-8">
+            <label>Logradouro *</label>
+            <input type="text" id="logradouro" placeholder="Nome da rua">
+        </div>
+        <div class="col-4">
+            <label>Número</label>
+            <input type="text" id="numero" placeholder="Nº">
+        </div>
+    </div>
+
+    <button id="btn-consultar" class="btn-main">🔍 CONSULTAR</button>
+
+    <div id="loading"><div class="spinner"></div> Consultando bases...</div>
+
+    <div id="results-area">
+        <div class="result-row border-uvis">
+            <div class="res-content">
+                <span class="res-label">UVIS</span>
+                <span id="res-uvis" class="res-value">-</span>
+            </div>
+            <button class="btn-copy" data-target="res-uvis" title="Copiar">❐</button>
+        </div>
+
+        <div class="result-row border-da">
+            <div class="res-content">
+                <span class="res-label">Distrito (DA)</span>
+                <span id="res-da" class="res-value">-</span>
+            </div>
+            <button class="btn-copy" data-target="res-da" title="Copiar">❐</button>
+        </div>
+
+        <div class="result-row border-std">
+            <div class="res-content">
+                <span class="res-label">Logradouro</span>
+                <span id="res-log" class="res-value">-</span>
+            </div>
+            <button class="btn-copy" data-target="res-log" title="Copiar">❐</button>
+        </div>
+
+        <div class="result-row border-std">
+            <div class="res-content">
+                <span class="res-label">Bairro</span>
+                <span id="res-bairro" class="res-value">-</span>
+            </div>
+            <button class="btn-copy" data-target="res-bairro" title="Copiar">❐</button>
+        </div>
+
+        <div class="result-row border-std">
+            <div class="res-content">
+                <span class="res-label">CEP</span>
+                <span id="res-cep" class="res-value">-</span>
+            </div>
+            <button class="btn-copy" data-target="res-cep" title="Copiar">❐</button>
+        </div>
+    </div>
+
+    <script src="turf.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
