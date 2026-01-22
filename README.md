@@ -26,6 +26,15 @@ Este projeto é **Open Source**. Priorizamos a privacidade e a transparência.
 * **Turf.js:** Processamento matemático dos polígonos feito localmente no seu navegador.
 
 ---
+## 📸 Como funciona
+
+A extensão é simples e direta. Veja o fluxo de uso:
+
+| 1️⃣ Digite o Endereço ou CEP | 2️⃣ Receba os Dados da UVIS/DA |
+| :---: | :---: |
+| ![Busca no Popup](./screenshots/popup_busca.jpg) | ![Resultado da Consulta](./screenshots/popup_resultado.jpg) |
+
+---
 
 ## Suporte e Contribuição
 
