@@ -1,5 +1,5 @@
-# Extensão - Consulta UVIS
-Consulta a **Unidade de Vigilância em Saúde (UVIS)** e o **Distrito Administrativo (DA)** de qualquer endereço diretamente pelo navegador.
+# Extensão - Consulta UVIS e UBS (São Paulo)
+Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativo (DA)** e a **Unidade Básica de Saúde (UBS)** de qualquer endereço diretamente pelo navegador.
 
 [![Disponível na Chrome Web Store]
 
