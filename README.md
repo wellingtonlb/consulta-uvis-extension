@@ -1,8 +1,7 @@
 # Extensão - Consulta UVIS e UBS (São Paulo)
 Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativo (DA)** e a **Unidade Básica de Saúde (UBS)** de qualquer endereço diretamente pelo navegador.
 
-[![Disponível na Chrome Web Store]](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)
-
+[**Baixe a Extensão na Chrome Web Store ↗**](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)
 
 **[Acesse a versão Web aqui](https://wellingtonlb.github.io/consulta-uvis/)**
 
