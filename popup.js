@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let geoJsonData = null;  
     let geoJsonUBS = null;   
     
+ 
     const arquivoUVIS = 'Territórios_UVIS.geojson'; 
     const arquivoUBS = 'Territorios_UBS.geojson';
 
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(err => {
         console.error(err);
-        mostrarErro("Erro ao carregar arquivos GeoJSON. Verifique se os nomes dos arquivos conferem (acentos importam).");
+        mostrarErro("Erro ao carregar arquivos GeoJSON. Verifique se os arquivos estão na pasta da extensão.");
     });
 
  
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length > 5) value = value.replace(/^(\d{5})(\d)/, '$1-$2');
             e.target.value = value;
 
+ 
             if (value.replace(/\D/g, '').length === 8) {
                 preencherEnderecoPeloCEP(value.replace(/\D/g, ''));
             }
@@ -57,20 +59,24 @@ document.addEventListener('DOMContentLoaded', function() {
  
     if(logradouroInput) {
         logradouroInput.addEventListener('input', function() {
-            if(cepInput) cepInput.value = "";
-            cidadeViaCEP = ""; 
+            if(cepInput.value !== "") {
+                cepInput.value = "";
+                cidadeViaCEP = ""; 
+            }
         });
     }
 
  
     if(btn) btn.addEventListener('click', buscarEndereco);
     
+ 
     document.getElementById('btn-limpar').addEventListener('click', function() {
         if(cepInput) cepInput.value = "";
         if(logradouroInput) logradouroInput.value = "";
         if(numeroInput) numeroInput.value = "";
         resultsDiv.style.display = 'none';
         cidadeViaCEP = "";
+        bairroViaCEP = "";
     });
 
  
@@ -92,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 logradouroInput.value = data.logradouro;
                 cidadeViaCEP = data.localidade;
                 bairroViaCEP = data.bairro;
+ 
                 if(numeroInput) numeroInput.focus();
             } else {
                 logradouroInput.placeholder = "CEP não encontrado";
@@ -120,68 +127,74 @@ document.addEventListener('DOMContentLoaded', function() {
             logradouro = logradouroInput.value;
         }
 
-        const urlBase = "https://nominatim.openstreetmap.org/search?";
-        const commonParams = "&format=json&limit=1&addressdetails=1";
-
- 
-        if (cidadeViaCEP !== "") {
-            const paramsStruct = new URLSearchParams({
-                street: numero !== "" ? `${numero} ${logradouro}` : logradouro,
-                city: cidadeViaCEP,
-                country: 'Brazil'
-            });
- 
-            if(cep.length === 8) paramsStruct.append('postalcode', cep);
-
-            fetch(urlBase + paramsStruct.toString() + commonParams)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        processarResultado(data[0]);
-                    } else {
- 
-                        fazerBuscaFlexivel(logradouro, numero);
-                    }
-                })
-                .catch(() => fazerBuscaFlexivel(logradouro, numero));
-        } else {
-            fazerBuscaFlexivel(logradouro, numero);
-        }
-    }
-
-    function fazerBuscaFlexivel(logradouro, numero) {
+        
+        
         let query = `${logradouro}`;
         if (numero !== "") query += `, ${numero}`;
         
+ 
         const cidadeAlvo = cidadeViaCEP !== "" ? cidadeViaCEP : "São Paulo";
         query += `, ${cidadeAlvo}, Brazil`;
 
-        const paramsFlex = new URLSearchParams({ q: query });
+        const params = new URLSearchParams({
+            format: 'json',
+            limit: 1,
+            q: query,
+            addressdetails: 1
+        });
 
  
+ 
         if (cidadeAlvo === "São Paulo") {
-            paramsFlex.append('viewbox', '-47.20,-23.10,-46.10,-24.00'); 
-            paramsFlex.append('bounded', '1'); 
+            params.append('viewbox', '-47.20,-23.10,-46.10,-24.00'); 
+            params.append('bounded', '1'); 
         }
-        paramsFlex.append('format', 'json');
-        paramsFlex.append('limit', '1');
-        paramsFlex.append('addressdetails', '1');
 
-        fetch(`https://nominatim.openstreetmap.org/search?${paramsFlex.toString()}`)
+        fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    processarResultado(data[0]);
+                } else {
+ 
+                    if(numero !== "") {
+                        fazerBuscaSemNumero(logradouro, cidadeAlvo);
+                    } else {
+                        loading.style.display = 'none';
+                        mostrarErro("Endereço não localizado.");
+                    }
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                mostrarErro("Erro de conexão com o mapa.");
+            });
+    }
+
+ 
+    function fazerBuscaSemNumero(logradouro, cidadeAlvo) {
+        const query = `${logradouro}, ${cidadeAlvo}, Brazil`;
+        const params = new URLSearchParams({
+            format: 'json',
+            limit: 1,
+            q: query,
+            addressdetails: 1
+        });
+
+        if (cidadeAlvo === "São Paulo") {
+            params.append('viewbox', '-47.20,-23.10,-46.10,-24.00'); 
+            params.append('bounded', '1'); 
+        }
+
+        fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
             .then(r => r.json())
             .then(data => {
                 if (data.length > 0) {
                     processarResultado(data[0]);
                 } else {
                     loading.style.display = 'none';
- 
-                    if(numero !== "") fazerBuscaFlexivel(logradouro, ""); 
-                    else mostrarErro("Endereço não localizado.");
+                    mostrarErro("Rua não localizada.");
                 }
-            })
-            .catch(err => {
-                loading.style.display = 'none';
-                mostrarErro("Erro de conexão com o mapa.");
             });
     }
 
@@ -242,6 +255,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 ubsEl.innerText = (uvisEncontrada !== "Fora da área mapeada") 
                     ? "Endereço na área, mas sem UBS vinculada" 
                     : "Fora da área de cobertura";
+                
+                if (uvisEncontrada !== "Fora da área mapeada") {
+                    ubsEl.style.color = "#ffc107";  
+                }
             }
 
             loading.style.display = 'none';
