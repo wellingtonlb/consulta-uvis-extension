@@ -3,92 +3,59 @@
 <head>
     <meta charset="utf-8">
     <style>
-        /* Estilos Gerais */
         body { 
             width: 380px; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: #f4f6f9; 
-            margin: 0; 
-            padding: 15px; 
+            margin: 0; padding: 15px; 
         }
+        h3 { color: #0d6efd; text-align: center; margin: 0 0 15px 0; font-size: 18px; }
 
-        h3 { 
-            color: #0d6efd; 
-            text-align: center; 
-            margin: 0 0 15px 0; 
-            font-size: 18px; 
-        }
-
-        /* Inputs */
         .input-group { margin-bottom: 10px; }
         label { font-size: 11px; font-weight: bold; color: #6c757d; display: block; margin-bottom: 2px; }
         input { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #ced4da; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-            font-size: 14px;
+            width: 100%; padding: 8px; border: 1px solid #ced4da; 
+            border-radius: 4px; box-sizing: border-box; font-size: 14px;
         }
         .row { display: flex; gap: 10px; }
-        .col-8 { flex: 2; }
-        .col-4 { flex: 1; }
+        .col-8 { flex: 2; } .col-4 { flex: 1; }
 
-        /* Botão */
-        button#btn-consultar { 
-            width: 100%; 
-            padding: 10px; 
-            background-color: #0d6efd; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 5px; 
+        button {
+            width: 100%; padding: 10px; border: none; border-radius: 4px;
+            font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        button#btn-consultar:hover { background-color: #0b5ed7; }
-        button#btn-consultar:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn-primary { background-color: #0d6efd; color: white; margin-bottom: 8px; }
+        .btn-primary:hover { background-color: #0b5ed7; }
+        .btn-outline { background-color: transparent; border: 1px solid #6c757d; color: #6c757d; }
+        .btn-outline:hover { background-color: #e9ecef; }
 
-        /* Resultados */
-        #results-area { display: none; margin-top: 15px; }
-        
+        #results { display: none; margin-top: 15px; border-top: 1px solid #dee2e6; pt: 10px; }
         .result-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: white; 
-            border: 1px solid #dee2e6; 
-            border-radius: 4px; 
-            padding: 8px; 
-            margin-bottom: 8px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            background: #fff; border: 1px solid #e9ecef; padding: 8px; 
+            border-radius: 6px; margin-bottom: 6px;
         }
-
-        .border-uvis { border-left: 3px solid #0d6efd; }
-        .border-da { border-left: 3px solid #6610f2; }
-        .border-std { border-left: 3px solid #adb5bd; }
-
-        .res-content { display: flex; flex-direction: column; width: 85%; }
-        .res-label { font-size: 10px; text-transform: uppercase; color: #6c757d; font-weight: bold; }
-        .res-value { font-size: 13px; color: #212529; font-weight: 600; word-break: break-word; }
+        .border-uvis { border-left: 4px solid #0d6efd; }
+        .border-da { border-left: 4px solid #198754; }
+        .border-std { border-left: 4px solid #adb5bd; }
         
-        .fw-bold { font-weight: 800; }
-
+        .res-content { flex: 1; min-width: 0; }
+        .res-label { font-size: 10px; color: #6c757d; text-transform: uppercase; font-weight: bold; display: block; }
+        .res-value { font-size: 13px; color: #212529; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        
         .btn-copy { 
-            background: none; 
-            border: 1px solid #dee2e6; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            padding: 4px 8px; 
-            color: #6c757d; 
+            background: #f8f9fa; border: 1px solid #dee2e6; color: #495057; 
+            width: 28px; height: 28px; border-radius: 4px; cursor: pointer; 
+            font-size: 14px; display: flex; align-items: center; justify-content: center; margin-left: 8px;
         }
-        .btn-copy:hover { background-color: #e9ecef; color: #0d6efd; }
+        .btn-copy:hover { background: #e2e6ea; color: #0d6efd; }
 
-        #loading { display: none; text-align: center; margin-top: 20px; color: #0d6efd; }
+        #loading { display: none; text-align: center; color: #6c757d; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h3>Localizador UVIS e UBS</h3>
+    <h3>Localizador UVIS, DA e UBS</h3>
 
     <div class="input-group">
         <label>CEP</label>
@@ -98,7 +65,7 @@
     <div class="row input-group">
         <div class="col-8">
             <label>Logradouro</label>
-            <input type="text" id="logradouro" placeholder="Nome da Rua">
+            <input type="text" id="logradouro" placeholder="Nome da rua">
         </div>
         <div class="col-4">
             <label>Número</label>
@@ -106,28 +73,29 @@
         </div>
     </div>
 
-    <button id="btn-consultar" disabled>Carregando bases...</button>
+    <button id="btn-consultar" class="btn-primary" disabled>Carregando bases...</button>
+    <button id="btn-limpar" class="btn-outline">LIMPAR TUDO</button>
 
     <div id="loading">Processando...</div>
 
-    <div id="results-area">
+    <div id="results">
         <div class="result-row border-uvis">
             <div class="res-content">
                 <span class="res-label">UVIS (Referência)</span>
                 <span id="res-uvis" class="res-value">-</span>
             </div>
-            <button class=\"btn-copy\" data-target=\"res-uvis\" title=\"Copiar\">❐</button>
+            <button class="btn-copy" data-target="res-uvis" title="Copiar">❐</button>
         </div>
 
         <div class="result-row border-da">
             <div class="res-content">
-                <span class="res-label">Distrito (DA)</span>
+                <span class="res-label">Distrito Administrativo</span>
                 <span id="res-da" class="res-value">-</span>
             </div>
             <button class="btn-copy" data-target="res-da" title="Copiar">❐</button>
         </div>
 
-        <div class="result-row" style="border-left: 3px solid #198754;">
+        <div class="result-row" style="border-left: 4px solid #198754;">
             <div class="res-content">
                 <span class="res-label" style="color: #198754;">🏥 UBS de Referência</span>
                 <span id="res-ubs" class="res-value fw-bold">-</span>
@@ -137,7 +105,7 @@
 
         <div class="result-row border-std">
             <div class="res-content">
-                <span class="res-label">Logradouro</span>
+                <span class="res-label">Endereço Localizado</span>
                 <span id="res-log" class="res-value">-</span>
             </div>
             <button class="btn-copy" data-target="res-log" title="Copiar">❐</button>
@@ -153,18 +121,14 @@
 
         <div class="result-row border-std">
             <div class="res-content">
-                <span class="res-label">CEP</span>
-                <span id="res-cep" class="res-value">-</span>
+                <span class="res-label">Cidade</span>
+                <span id="res-cidade" class="res-value">-</span>
             </div>
-            <button class="btn-copy" data-target="res-cep" title="Copiar">❐</button>
+            <button class="btn-copy" data-target="res-cidade" title="Copiar">❐</button>
         </div>
     </div>
 
-    <p style="text-align: center; margin-top: 15px; font-size: 10px; color: #adb5bd;">
-        Política de Privacidade
-    </p>
-
-    <script src="popup.js"></script>
     <script src="turf.js"></script>
+    <script src="popup.js"></script>
 </body>
 </html>

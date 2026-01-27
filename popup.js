@@ -1,14 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Extensão iniciada.");
-
-    let geoJsonData = null; 
+    
+ 
+    let geoJsonData = null;  
     let geoJsonUBS = null;   
-    let bairroCache = "";
-
-    const arquivoUVIS = 'Territórios_UVIS.geojson';
+    
+    const arquivoUVIS = 'Territórios_UVIS.geojson'; 
     const arquivoUBS = 'Territorios_UBS.geojson';
 
     const btn = document.getElementById('btn-consultar');
+    const loading = document.getElementById('loading');
+    const resultsDiv = document.getElementById('results');
+    
+ 
+    const cepInput = document.getElementById('cep');
+    const logradouroInput = document.getElementById('logradouro');
+    const numeroInput = document.getElementById('numero');
+
+ 
+    let cidadeViaCEP = ""; 
+    let bairroViaCEP = "";
 
  
     Promise.all([
@@ -18,209 +28,252 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(([dataUVIS, dataUBS]) => {
         geoJsonData = dataUVIS;
         geoJsonUBS = dataUBS;
-        console.log("Todas as bases carregadas!");
+        console.log("Bases carregadas.");
         if (btn) {
             btn.innerText = "🔍 CONSULTAR";
             btn.disabled = false;
         }
     })
     .catch(err => {
-        console.error("Erro ao ler arquivos:", err);
-        const title = document.querySelector('h3');
-        if (title) {
-            title.innerText = "❌ ERRO: Bases não encontradas";
-            title.style.color = "red";
-        }
-        alert(`ATENÇÃO: Não consegui ler os arquivos GeoJSON.\nVerifique se eles estão na pasta.`);
+        console.error(err);
+        mostrarErro("Erro ao carregar arquivos GeoJSON. Verifique se os nomes dos arquivos conferem (acentos importam).");
     });
 
  
-    const cepInput = document.getElementById('cep');
-    if (cepInput) {
-        cepInput.addEventListener('blur', function() {
-            let cep = this.value.replace(/\D/g, '');
-            if (cep.length === 8) {
-                fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!data.erro) {
-                            document.getElementById('logradouro').value = data.logradouro;
-                            bairroCache = data.bairro;
-                        }
-                    })
-                    .catch(err => console.log("Erro no ViaCEP", err));
+    
+ 
+    if(cepInput) {
+        cepInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 5) value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+
+            if (value.replace(/\D/g, '').length === 8) {
+                preencherEnderecoPeloCEP(value.replace(/\D/g, ''));
             }
         });
     }
 
  
-    if (btn) {
-        btn.addEventListener('click', function() {
-            const rua = document.getElementById('logradouro').value;
-            const num = document.getElementById('numero').value;
-            const cepVal = document.getElementById('cep').value;
-
-            if (!rua) return alert("Preencha o logradouro.");
-
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('results-area');
-
-            btn.style.display = 'none';
-            loading.style.display = 'block';
-            results.style.display = 'none';
-
-            const query = `${rua}, ${num}, São Paulo, Brasil`;
-            
- 
-            const cacheKey = `geo_${query.toLowerCase().replace(/\s/g, '_')}`;
-            const cachedData = localStorage.getItem(cacheKey);
-
-            const processarDados = (data) => {
-                loading.style.display = 'none';
-                btn.style.display = 'block';
-
-                if (data && data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
+    if(logradouroInput) {
+        logradouroInput.addEventListener('input', function() {
+            if(cepInput) cepInput.value = "";
+            cidadeViaCEP = ""; 
+        });
+    }
 
  
-                    document.getElementById('res-log').innerText = rua + (num ? `, ${num}` : '');
-                    
-                    let cepEncontrado = cepVal;
-                    if (!cepEncontrado && data[0].address && data[0].address.postcode) {
-                        cepEncontrado = data[0].address.postcode;
-                    }
-                    document.getElementById('res-cep').innerText = cepEncontrado || "Não informado";
-
-                    let bairroMapa = "";
-                    if (data[0].address) {
-                        bairroMapa = data[0].address.suburb || data[0].address.neighbourhood || data[0].address.residential || data[0].address.city_district || "";
-                    }
-                    const bairroFinal = bairroCache || bairroMapa || "Não identificado";
-                    document.getElementById('res-bairro').innerText = bairroFinal;
+    if(btn) btn.addEventListener('click', buscarEndereco);
+    
+    document.getElementById('btn-limpar').addEventListener('click', function() {
+        if(cepInput) cepInput.value = "";
+        if(logradouroInput) logradouroInput.value = "";
+        if(numeroInput) numeroInput.value = "";
+        resultsDiv.style.display = 'none';
+        cidadeViaCEP = "";
+    });
 
  
-                    if (typeof turf !== 'undefined' && geoJsonData) {
-                        const ponto = turf.point([lon, lat]);
-                        
-                        let candidatosUVIS = [];
-                        let candidatosDA = [];
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('keypress', function (e) { 
+            if (e.key === 'Enter') buscarEndereco(); 
+        });
+    });
 
  
-                        turf.featureEach(geoJsonData, function(feat) {
-                            if (turf.booleanPointInPolygon(ponto, feat)) {
-                                const props = feat.properties;
-                                for (const [key, value] of Object.entries(props)) {
-                                    const k = key.toLowerCase();
-                                    const v = String(value).trim();
 
- 
-                                    if (k.includes('uvis')) {
-                                        let pontos = 0;
-                                        if (k.includes('nome') || k.includes('nm')) pontos += 20;
-                                        if (isNaN(v)) pontos += 10;
-                                        candidatosUVIS.push({ valor: v, pontos: pontos });
-                                    }
+    async function preencherEnderecoPeloCEP(cep) {
+        try {
+            logradouroInput.placeholder = "Buscando...";
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await response.json();
 
- 
-                                    if (k.includes('da') || k.includes('distrito')) {
-                                        let pontos = 0;
-                                        
- 
-                                        if (k.includes('nome') || k.includes('nm')) pontos += 100;
-                                        
- 
-                                        if (k.includes('cod') || k.includes('cd') || k.includes('id')) pontos -= 100;
-                                        
-                                        
-                                        if (!isNaN(v.replace(',', '.'))) {
-                                            pontos -= 50;  
-                                        } else {
-                                            pontos += 50;  
-                                        }
-
-                                        candidatosDA.push({ valor: v, pontos: pontos });
-                                    }
-                                }
-                            }
-                        });
-
-                        candidatosUVIS.sort((a, b) => b.pontos - a.pontos);
-                        candidatosDA.sort((a, b) => b.pontos - a.pontos);
-
-                        document.getElementById('res-uvis').innerText = candidatosUVIS.length > 0 ? candidatosUVIS[0].valor : "Fora da área mapeada";
-                        document.getElementById('res-da').innerText = candidatosDA.length > 0 ? candidatosDA[0].valor : "Fora da área mapeada";
-
- 
-                        let nomeUBS = "Não localizada na base";
-                        let achouUBS = false;
-
-                        if (geoJsonUBS) {
-                            turf.featureEach(geoJsonUBS, function(feat) {
-                                if (achouUBS) return; 
-                                
- 
-                                if (feat.geometry.type !== 'Polygon' && feat.geometry.type !== 'MultiPolygon') return;
-
-                                if (turf.booleanPointInPolygon(ponto, feat)) {
-                                    const p = feat.properties;
-                                    nomeUBS = p.Name || p.name || p.NOME || p.NO_FANTASIA || p.description || "Sem Nome";
-                                    nomeUBS = nomeUBS.replace(/<[^>]*>?/gm, ''); 
-                                    achouUBS = true;
-                                }
-                            });
-                        }
-
-                        const elUBS = document.getElementById('res-ubs');
-                        if (elUBS) {
-                            elUBS.innerText = nomeUBS;
-                            if (achouUBS) elUBS.style.color = "#198754";
-                            else elUBS.style.color = "#6c757d";
-                        }
-                    }
-                    
-                    results.style.display = 'block';
-                } else {
-                    alert("Endereço não encontrado.");
-                }
-            };
-
- 
-            if (cachedData) {
-                console.log("Usando cache local");
-                processarDados(JSON.parse(cachedData));
+            if (!data.erro) {
+                logradouroInput.value = data.logradouro;
+                cidadeViaCEP = data.localidade;
+                bairroViaCEP = data.bairro;
+                if(numeroInput) numeroInput.focus();
             } else {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(query)}&email=wellingtonlb22@outlook.com`, {
-                    headers: { "Accept-Language": "pt-BR" }
-                })
-                .then(res => res.json())
+                logradouroInput.placeholder = "CEP não encontrado";
+            }
+        } catch (error) {
+            console.error(error);
+            logradouroInput.placeholder = "Erro na busca";
+        }
+    }
+
+    async function buscarEndereco() {
+        if (!geoJsonData) return mostrarErro("Aguarde o carregamento das bases.");
+
+        let cep = cepInput.value.replace(/\D/g, '');
+        let logradouro = logradouroInput.value.trim();
+        let numero = numeroInput.value.trim();
+
+        if (logradouro === "") return mostrarErro("Preencha o logradouro.");
+
+        loading.style.display = 'block';
+        resultsDiv.style.display = 'none';
+
+ 
+        if (cep.length === 8 && cidadeViaCEP === "") {
+            await preencherEnderecoPeloCEP(cep);
+            logradouro = logradouroInput.value;
+        }
+
+        const urlBase = "https://nominatim.openstreetmap.org/search?";
+        const commonParams = "&format=json&limit=1&addressdetails=1";
+
+ 
+        if (cidadeViaCEP !== "") {
+            const paramsStruct = new URLSearchParams({
+                street: numero !== "" ? `${numero} ${logradouro}` : logradouro,
+                city: cidadeViaCEP,
+                country: 'Brazil'
+            });
+ 
+            if(cep.length === 8) paramsStruct.append('postalcode', cep);
+
+            fetch(urlBase + paramsStruct.toString() + commonParams)
+                .then(r => r.json())
                 .then(data => {
-                    if (data && data.length > 0) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
-                        processarDados(data);
+                    if (data.length > 0) {
+                        processarResultado(data[0]);
                     } else {
-                        processarDados([]);
+ 
+                        fazerBuscaFlexivel(logradouro, numero);
                     }
                 })
-                .catch(err => {
+                .catch(() => fazerBuscaFlexivel(logradouro, numero));
+        } else {
+            fazerBuscaFlexivel(logradouro, numero);
+        }
+    }
+
+    function fazerBuscaFlexivel(logradouro, numero) {
+        let query = `${logradouro}`;
+        if (numero !== "") query += `, ${numero}`;
+        
+        const cidadeAlvo = cidadeViaCEP !== "" ? cidadeViaCEP : "São Paulo";
+        query += `, ${cidadeAlvo}, Brazil`;
+
+        const paramsFlex = new URLSearchParams({ q: query });
+
+ 
+        if (cidadeAlvo === "São Paulo") {
+            paramsFlex.append('viewbox', '-47.20,-23.10,-46.10,-24.00'); 
+            paramsFlex.append('bounded', '1'); 
+        }
+        paramsFlex.append('format', 'json');
+        paramsFlex.append('limit', '1');
+        paramsFlex.append('addressdetails', '1');
+
+        fetch(`https://nominatim.openstreetmap.org/search?${paramsFlex.toString()}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    processarResultado(data[0]);
+                } else {
                     loading.style.display = 'none';
-                    btn.style.display = 'block';
-                    alert("Erro de conexão.");
+ 
+                    if(numero !== "") fazerBuscaFlexivel(logradouro, ""); 
+                    else mostrarErro("Endereço não localizado.");
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                mostrarErro("Erro de conexão com o mapa.");
+            });
+    }
+
+    function processarResultado(item) {
+        try {
+            const lat = parseFloat(item.lat);
+            const lon = parseFloat(item.lon);
+            const addr = item.address || {};
+
+ 
+            setText('res-log', `${logradouroInput.value}, ${numeroInput.value}`);
+            setText('res-bairro', cidadeViaCEP !== "" ? bairroViaCEP : (addr.suburb || addr.neighbourhood || "-"));
+            setText('res-cidade', cidadeViaCEP !== "" ? cidadeViaCEP : (addr.city || addr.town || "São Paulo"));
+            setText('res-cep', cepInput.value || addr.postcode || "-");
+
+ 
+            if (typeof turf === 'undefined') {
+                throw new Error("Biblioteca Turf.js não carregada.");
+            }
+
+            const ponto = turf.point([lon, lat]);
+            let uvisEncontrada = "Fora da área mapeada";
+            let daEncontrada = "-";
+            let ubsEncontrada = "Não identificada";
+
+ 
+            turf.featureEach(geoJsonData, function (feat) {
+                if (turf.booleanPointInPolygon(ponto, feat)) {
+                    const props = feat.properties;
+                    for (const [key, val] of Object.entries(props)) {
+                        const k = key.toLowerCase();
+                        if (k.includes('uvis') && (k.includes('nome') || isNaN(val))) uvisEncontrada = val;
+                        if ((k.includes('da') || k.includes('distrito')) && isNaN(val)) daEncontrada = val;
+                    }
+                }
+            });
+
+ 
+            if (geoJsonUBS) {
+                turf.featureEach(geoJsonUBS, function (feat) {
+                    if (turf.booleanPointInPolygon(ponto, feat)) {
+                        const p = feat.properties;
+                        ubsEncontrada = p.Name || p.name || p.NOME || p.NO_FANTASIA || "Sem Nome";
+                    }
                 });
             }
-        });
+
+ 
+            setText('res-uvis', uvisEncontrada);
+            setText('res-da', daEncontrada);
+            
+            const ubsEl = document.getElementById('res-ubs');
+            if (ubsEncontrada !== "Não identificada") {
+                ubsEl.style.color = "#198754";
+                ubsEl.innerText = ubsEncontrada;
+            } else {
+                ubsEl.style.color = "#6c757d";
+                ubsEl.innerText = (uvisEncontrada !== "Fora da área mapeada") 
+                    ? "Endereço na área, mas sem UBS vinculada" 
+                    : "Fora da área de cobertura";
+            }
+
+            loading.style.display = 'none';
+            resultsDiv.style.display = 'block';
+
+        } catch (e) {
+            console.error(e);
+            mostrarErro("Erro ao processar dados: " + e.message);
+        }
+    }
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if(el) el.innerText = text;
+    }
+
+    function mostrarErro(msg) {
+        loading.style.display = 'block';
+        loading.style.color = 'red';
+        loading.innerText = msg;
     }
 
  
-    document.querySelectorAll('.btn-copy').forEach(btnCopy => {
-        btnCopy.addEventListener('click', function() {
+    document.querySelectorAll('.btn-copy').forEach(btn => {
+        btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
             const el = document.getElementById(targetId);
-            if (el) {
+            if(el) {
                 navigator.clipboard.writeText(el.innerText).then(() => {
-                    const originalText = this.innerText;
+                    const original = this.innerText;
                     this.innerText = "✓";
-                    setTimeout(() => { this.innerText = originalText; }, 1500);
+                    setTimeout(() => { this.innerText = original; }, 1500);
                 });
             }
         });
