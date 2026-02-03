@@ -3,36 +3,40 @@
 <head>
     <meta charset="utf-8">
     <style>
+ 
         body { 
-            width: 380px; 
+            width: 360px; /* Largura fixa boa para extensões */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: #f4f6f9; 
             margin: 0; padding: 15px; 
         }
-        h3 { color: #0d6efd; text-align: center; margin: 0 0 15px 0; font-size: 18px; }
+        h3 { color: #0d6efd; text-align: center; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
+ 
         .input-group { margin-bottom: 10px; }
-        label { font-size: 11px; font-weight: bold; color: #6c757d; display: block; margin-bottom: 2px; }
+        label { font-size: 11px; font-weight: bold; color: #6c757d; display: block; margin-bottom: 3px; }
         input { 
             width: 100%; padding: 8px; border: 1px solid #ced4da; 
-            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+            border-radius: 4px; box-sizing: border-box; font-size: 13px;
         }
         .row { display: flex; gap: 10px; }
         .col-8 { flex: 2; } .col-4 { flex: 1; }
 
+ 
         button {
             width: 100%; padding: 10px; border: none; border-radius: 4px;
-            font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
         .btn-primary { background-color: #0d6efd; color: white; margin-bottom: 8px; }
         .btn-primary:hover { background-color: #0b5ed7; }
-        .btn-outline { background-color: transparent; border: 1px solid #6c757d; color: #6c757d; }
+        .btn-outline { background-color: transparent; border: 1px solid #adb5bd; color: #6c757d; }
         .btn-outline:hover { background-color: #e9ecef; }
 
-        #results { display: none; margin-top: 15px; border-top: 1px solid #dee2e6; pt: 10px; }
+ 
+        #results { display: none; margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 10px; }
         .result-row { 
             display: flex; align-items: center; justify-content: space-between; 
-            background: #fff; border: 1px solid #e9ecef; padding: 8px; 
+            background: #fff; border: 1px solid #e9ecef; padding: 8px 10px; 
             border-radius: 6px; margin-bottom: 6px;
         }
         .border-uvis { border-left: 4px solid #0d6efd; }
@@ -40,92 +44,121 @@
         .border-std { border-left: 4px solid #adb5bd; }
         
         .res-content { flex: 1; min-width: 0; }
-        .res-label { font-size: 10px; color: #6c757d; text-transform: uppercase; font-weight: bold; display: block; }
-        .res-value { font-size: 13px; color: #212529; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .res-label { font-size: 9px; color: #6c757d; text-transform: uppercase; font-weight: bold; display: block; }
+        .res-value { font-size: 12px; color: #212529; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
         
         .btn-copy { 
             background: #f8f9fa; border: 1px solid #dee2e6; color: #495057; 
-            width: 28px; height: 28px; border-radius: 4px; cursor: pointer; 
-            font-size: 14px; display: flex; align-items: center; justify-content: center; margin-left: 8px;
+            width: 26px; height: 26px; border-radius: 4px; cursor: pointer; 
+            font-size: 12px; display: flex; align-items: center; justify-content: center; margin-left: 8px;
         }
         .btn-copy:hover { background: #e2e6ea; color: #0d6efd; }
 
         #loading { display: none; text-align: center; color: #6c757d; font-size: 12px; margin-top: 10px; }
+
+ 
+        #selection-screen { display: none; margin-top: 10px; }
+        .selection-title { font-size: 12px; color: #6c757d; margin-bottom: 8px; text-align: center; }
+        .selection-item {
+            background: white; border: 1px solid #dee2e6; padding: 8px; margin-bottom: 5px;
+            border-radius: 4px; cursor: pointer; transition: 0.2s;
+        }
+        .selection-item:hover { border-color: #0d6efd; background-color: #f8fbff; }
+        .sel-rua { font-weight: bold; font-size: 12px; color: #212529; }
+        .sel-detalhe { font-size: 11px; color: #6c757d; }
+        .badge-bairro { background: #e9ecef; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+        .btn-back { background: #6c757d; color: white; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <h3>Localizador UVIS, DA e UBS</h3>
+    <div id="main-content">
+        <h3>Localizador UVIS, DA e UBS</h3>
 
-    <div class="input-group">
-        <label>CEP</label>
-        <input type="text" id="cep" placeholder="00000-000" maxlength="9">
+        <div class="input-group">
+            <label>CEP</label>
+            <input type="text" id="cep" placeholder="00000-000" maxlength="9">
+        </div>
+
+        <div class="row input-group">
+            <div class="col-8">
+                <label>Logradouro</label>
+                <input type="text" id="logradouro" placeholder="Nome da rua">
+            </div>
+            <div class="col-4">
+                <label>Número</label>
+                <input type="text" id="numero" placeholder="Nº">
+            </div>
+        </div>
+
+        <button id="btn-consultar" class="btn-primary" disabled>Carregando bases...</button>
+        <button id="btn-limpar" class="btn-outline">LIMPAR TUDO</button>
+
+        <div id="loading">Processando...</div>
+
+        <div id="results">
+            <div class="result-row border-uvis">
+                <div class="res-content">
+                    <span class="res-label">UVIS (Referência)</span>
+                    <span id="res-uvis" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-uvis" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row border-da">
+                <div class="res-content">
+                    <span class="res-label">Distrito Administrativo</span>
+                    <span id="res-da" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-da" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row" style="border-left: 4px solid #198754;">
+                <div class="res-content">
+                    <span class="res-label" style="color: #198754;">🏥 UBS de Referência</span>
+                    <span id="res-ubs" class="res-value fw-bold">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-ubs" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row border-std">
+                <div class="res-content">
+                    <span class="res-label">Endereço Localizado</span>
+                    <span id="res-log" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-log" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row border-std">
+                <div class="res-content">
+                    <span class="res-label">Bairro</span>
+                    <span id="res-bairro" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-bairro" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row border-std">
+                <div class="res-content">
+                    <span class="res-label">Cidade</span>
+                    <span id="res-cidade" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-cidade" title="Copiar">❐</button>
+            </div>
+
+            <div class="result-row border-std">
+                <div class="res-content">
+                    <span class="res-label">CEP</span>
+                    <span id="res-cep" class="res-value">-</span>
+                </div>
+                <button class="btn-copy" data-target="res-cep" title="Copiar">❐</button>
+            </div>
+        </div>
     </div>
 
-    <div class="row input-group">
-        <div class="col-8">
-            <label>Logradouro</label>
-            <input type="text" id="logradouro" placeholder="Nome da rua">
-        </div>
-        <div class="col-4">
-            <label>Número</label>
-            <input type="text" id="numero" placeholder="Nº">
-        </div>
-    </div>
-
-    <button id="btn-consultar" class="btn-primary" disabled>Carregando bases...</button>
-    <button id="btn-limpar" class="btn-outline">LIMPAR TUDO</button>
-
-    <div id="loading">Processando...</div>
-
-    <div id="results">
-        <div class="result-row border-uvis">
-            <div class="res-content">
-                <span class="res-label">UVIS (Referência)</span>
-                <span id="res-uvis" class="res-value">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-uvis" title="Copiar">❐</button>
-        </div>
-
-        <div class="result-row border-da">
-            <div class="res-content">
-                <span class="res-label">Distrito Administrativo</span>
-                <span id="res-da" class="res-value">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-da" title="Copiar">❐</button>
-        </div>
-
-        <div class="result-row" style="border-left: 4px solid #198754;">
-            <div class="res-content">
-                <span class="res-label" style="color: #198754;">🏥 UBS de Referência</span>
-                <span id="res-ubs" class="res-value fw-bold">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-ubs" title="Copiar">❐</button>
-        </div>
-
-        <div class="result-row border-std">
-            <div class="res-content">
-                <span class="res-label">Endereço Localizado</span>
-                <span id="res-log" class="res-value">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-log" title="Copiar">❐</button>
-        </div>
-
-        <div class="result-row border-std">
-            <div class="res-content">
-                <span class="res-label">Bairro</span>
-                <span id="res-bairro" class="res-value">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-bairro" title="Copiar">❐</button>
-        </div>
-
-        <div class="result-row border-std">
-            <div class="res-content">
-                <span class="res-label">Cidade</span>
-                <span id="res-cidade" class="res-value">-</span>
-            </div>
-            <button class="btn-copy" data-target="res-cidade" title="Copiar">❐</button>
-        </div>
+    <div id="selection-screen">
+        <div class="selection-title">📍 Encontramos opções similares:</div>
+        <div id="selection-list"></div>
+        <button id="btn-voltar" class="btn-back">Voltar</button>
     </div>
 
     <script src="turf.js"></script>
