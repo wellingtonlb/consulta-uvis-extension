@@ -3,7 +3,7 @@ Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativ
 
 [**Baixe a Extensão na Chrome Web Store ↗**](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)
 
-**[Acesse a versão Web clicando aqui](https://wellingtonlb.github.io/consulta-uvis/)
+**[Acesse a versão Web clicando aqui](https://wellingtonlb.github.io/consulta-uvis/)**
 
 **[Acesse o repositório da versão Web clicando aqui](https://github.com/wellingtonlb/consulta-uvis/)**
 
