@@ -5,7 +5,7 @@ Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativ
 
 **[Acesse a versão Web clicando aqui](https://wellingtonlb.github.io/consulta-uvis/)
 
-## [Acesse o repositório da versão Web clicando aqui](https://github.com/wellingtonlb/consulta-uvis/)
+**[Acesse o repositório da versão Web clicando aqui](https://github.com/wellingtonlb/consulta-uvis/)**
 
 ---
 ## Instalação
