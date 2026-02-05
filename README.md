@@ -1,4 +1,4 @@
-# Extensão - Consulta UVIS e UBS (São Paulo)
+# Extensão - Consulta de Território UVIS e UBS (São Paulo)
 Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativo (DA)** e a **Unidade Básica de Saúde (UBS)** de qualquer endereço diretamente pelo navegador.
 
 [**Baixe a Extensão na Chrome Web Store ↗**](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)
