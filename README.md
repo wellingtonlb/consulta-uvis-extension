@@ -3,7 +3,9 @@ Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativ
 
 [**Baixe a Extensão na Chrome Web Store ↗**](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)
 
-**[Acesse a versão Web clicando aqui](https://wellingtonlb.github.io/consulta-uvis/)**
+**[Acesse a versão Web clicando aqui](https://wellingtonlb.github.io/consulta-uvis/)
+
+## [Acesse o repositório da versão Web clicando aqui](https://github.com/wellingtonlb/consulta-uvis/)
 
 ---
 ## Instalação
@@ -39,11 +41,7 @@ A extensão é simples e direta. Veja o fluxo de uso:
 Encontrou um erro ou o mapa não bateu com a realidade?
 * Abra uma **[Issue](https://github.com/wellingtonlb/territorio_uvis/issues)** aqui no GitHub.
 * Ou envie um e-mail através da página da Chrome Web Store.
-
----
-
-## [Acesse o repositório da versão Web clicando aqui](https://github.com/wellingtonlb/consulta-uvis/)
-
+  
 ---
 
 ## Licença
