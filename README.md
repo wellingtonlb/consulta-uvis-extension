@@ -10,7 +10,7 @@ Consulta a **Unidade de Vigilância em Saúde (UVIS)**, **Distrito Administrativ
 
 A maneira mais segura e fácil é instalar através da loja oficial:
 
-1. Acesse a página na **[Chrome Web Store]**.
+1. Acesse a página na **[Chrome Web Store](https://chromewebstore.google.com/detail/localizador-uvis-e-ubs/ohhkpccnilhbbhgeidmajpghpjgpipcc)**.
 2. Clique em **"Usar no Chrome"**.
 3. O ícone aparecerá na sua barra de tarefas.
 
