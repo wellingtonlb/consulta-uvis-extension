@@ -16,7 +16,7 @@ A maneira mais segura e fácil é instalar através da loja oficial:
 
 ## Sobre
 
-Este projeto é **Open Source**. Foi priorizada a privacidade e a transparência.
+Este projeto é **Open Source**, com privacidade e a transparência.
 
 * **Manifest V3:** Segue os padrões mais recentes de segurança do Google.
 * **Sem Rastreamento:** Nenhuma informação pessoal ou de navegação é coletada.
